@@ -30,10 +30,15 @@ func main() {
 		fmt.Println("server must be not be blank.")
 		return
 	}
-	domains, err := loadcsvDomainFile(csvDomainFile)
-	if err != nil {
-		fmt.Printf("error loading domain file: %s\n", err)
-		return
+	var domains []string
+	cdfs := strings.Split(csvDomainFile, ",")
+	for i := range cdfs {
+		ds, err := loadcsvDomainFile(cdfs[i])
+		if err != nil {
+			fmt.Printf("error loading domain file: %s\n", err)
+			return
+		}
+		domains = append(domains, ds...)
 	}
 	rrTypes := []uint16{}
 	if httpsrr {
@@ -53,9 +58,9 @@ func main() {
 			if err != nil {
 				log.Println(err)
 			} else if debug > 3 {
-				log.Printf("msg: %v rtt: %v", msg, rtt)
+				log.Printf("%s: msg: %v rtt: %v", domains[i], msg, rtt)
 			} else if debug > 1 {
-				log.Printf("answer: %v rtt: %v", msg.Answer, rtt)
+				log.Printf("%s: answer: %v rtt: %v", domains[i], msg.Answer, rtt)
 			}
 		}
 		time.Sleep(time.Second)
@@ -69,14 +74,19 @@ func loadcsvDomainFile(fname string) (domains []string, err error) {
 	}
 	defer f.Close()
 	scanner := bufio.NewScanner(f)
-	i := 1
+	i := 0
 	for scanner.Scan() {
+		i++
 		line := scanner.Text()
 		_, a, f := strings.Cut(line, ",")
 		if !f {
 			return domains, fmt.Errorf("comma not found on line %d: %s", i, line)
 		}
-		i++
+
+		a = strings.TrimSpace(a)
+		if len(a) == 0 {
+			continue
+		}
 		if !strings.HasSuffix(a, ".") {
 			a = a + "."
 		}

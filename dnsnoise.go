@@ -17,6 +17,7 @@ func main() {
 	var server, csvDomainFile string
 	var aaaarr, httpsrr bool
 	var debug int
+	var pause time.Duration
 	// TODO: Support multiple servers.
 	flag.StringVar(&server, "server", "68.94.156.1:53",
 		"a dns server - not your local server, we don't want to bust its cache")
@@ -25,6 +26,7 @@ func main() {
 	flag.IntVar(&debug, "debug", 0, "debug level")
 	flag.BoolVar(&aaaarr, "aaaarr", true, "query for AAAA RR before A to look like IPv6 enabled client")
 	flag.BoolVar(&httpsrr, "httpsrr", false, "query for HTTPS RR before A to look like modern (Apple) client")
+	flag.DurationVar(&pause, "pause", time.Second, "time to pause between queries")
 	flag.Parse()
 	if server == "" {
 		fmt.Println("server must be not be blank.")
@@ -63,7 +65,7 @@ func main() {
 				log.Printf("%s: answer: %v rtt: %v", domains[i], msg.Answer, rtt)
 			}
 		}
-		time.Sleep(time.Second)
+		time.Sleep(pause)
 	}
 }
 

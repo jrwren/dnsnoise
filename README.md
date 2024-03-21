@@ -12,10 +12,10 @@ and the useful entries evicted from cache.
 
 ```sh
 go install github.com/jrwren/dnsnoise
-dnsnoise -server 8.8.8.8  # If you use Google DNS.
-dnsnoise -server 68.94.156.1  # If you use ATT DNS.
-dnsnoise -server 1.1.1.1  # If you use Cloudflare DNS.
-# ... etc etc
+dnsnoise -server 8.8.8.8,8.8.4.4  # If you use Google DNS.
+dnsnoise -server 68.94.156.1,68.94.157.1  # If you use ATT DNS.
+dnsnoise -server 1.1.1.1,1.0.0.1  # If you use Cloudflare DNS.
+# ... etc
 ```
 
 # Usage
@@ -31,8 +31,10 @@ Usage of dnsnoise:
     	debug level
   -httpsrr
     	query for HTTPS RR before A to look like modern (Apple) client
+  -pause duration
+    	time to pause between queries (default 1s)
   -server string
-    	a dns server - not your local server, we don't want to bust its cache (default "68.94.156.1:53")
+    	a dns server - not your local server, we don't want to bust its cache (default "68.94.156.1:53,68.94.157.1:53")
 
 ```
 

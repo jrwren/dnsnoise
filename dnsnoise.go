@@ -19,7 +19,7 @@ func main() {
 	var debug int
 	var pause time.Duration
 	// TODO: Support multiple servers.
-	flag.StringVar(&server, "server", "68.94.156.1:53",
+	flag.StringVar(&server, "server", "68.94.156.1:53,68.94.157.1:53",
 		"a dns server - not your local server, we don't want to bust its cache")
 	flag.StringVar(&csvDomainFile, "csvdomainfile", "top-1m.csv",
 		"The top 1M file from https://s3-us-west-1.amazonaws.com/umbrella-static/index.html")
@@ -32,6 +32,7 @@ func main() {
 		fmt.Println("server must be not be blank.")
 		return
 	}
+	servers := strings.Split(server, ",")
 	var domains []string
 	cdfs := strings.Split(csvDomainFile, ",")
 	for i := range cdfs {
@@ -52,7 +53,10 @@ func main() {
 	rrTypes = append(rrTypes, dns.TypeA)
 	c := new(dns.Client)
 	m := new(dns.Msg)
+	j := 0
 	for {
+		server = servers[j%len(servers)]
+		j++
 		i := rand.Intn(len(domains))
 		for _, rrType := range rrTypes {
 			m.SetQuestion(domains[i], rrType)
@@ -60,9 +64,9 @@ func main() {
 			if err != nil {
 				log.Println(err)
 			} else if debug > 3 {
-				log.Printf("%s: msg: %v rtt: %v", domains[i], msg, rtt)
+				log.Printf("%s %s: msg: %v rtt: %v", server, domains[i], msg, rtt)
 			} else if debug > 1 {
-				log.Printf("%s: answer: %v rtt: %v", domains[i], msg.Answer, rtt)
+				log.Printf("%s %s: answer: %v rtt: %v", server, domains[i], msg.Answer, rtt)
 			}
 		}
 		time.Sleep(pause)
